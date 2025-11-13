@@ -1,10 +1,13 @@
 import jwt
 
-# Ensure PyJWT names exist for allauth compatibility
-if not hasattr(jwt, "decode"):
-    from jwt import decode
-    jwt.decode = decode
+# Ensure PyJWT names exist for django-allauth compatibility
 
+# Make sure jwt.decode exists (PyJWT >= 2.x already has it)
+if not hasattr(jwt, "decode"):
+    original_decode = jwt.PyJWT().decode
+    jwt.decode = original_decode
+
+# Ensure PyJWTError exists
 if not hasattr(jwt, "PyJWTError"):
     try:
         from jwt.exceptions import InvalidTokenError as PyJWTError
@@ -13,6 +16,7 @@ if not hasattr(jwt, "PyJWTError"):
             pass
     jwt.PyJWTError = PyJWTError
 
+# Ensure ExpiredSignatureError exists
 if not hasattr(jwt, "ExpiredSignatureError"):
     try:
         from jwt.exceptions import ExpiredSignatureError
@@ -22,6 +26,7 @@ if not hasattr(jwt, "ExpiredSignatureError"):
             pass
         jwt.ExpiredSignatureError = ExpiredSignatureError
 
+# Ensure InvalidAudienceError exists
 if not hasattr(jwt, "InvalidAudienceError"):
     try:
         from jwt.exceptions import InvalidAudienceError
