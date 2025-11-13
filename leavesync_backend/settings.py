@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "changeme")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -39,13 +39,23 @@ SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "secret": os.getenv("GOOGLE_SECRET"),
-            "key": "",
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": ""
         },
-        "SCOPE": ["profile", "email"],
+        "SCOPE": [
+            "email",
+            "profile"
+        ],
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
+
+ALLOWED_HOSTS = [
+    "leavesync-ai.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+
 
 SOCIALACCOUNT_STORE_TOKENS = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
