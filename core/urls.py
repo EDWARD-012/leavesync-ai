@@ -6,7 +6,8 @@ urlpatterns = [
     path("accounts/logout/success/", views.logout_success, name="logout_success"),
 
     # Dashboards
-    path("dashboard/", views.employee_dashboard, name="employee_dashboard"),
+    path("dashboard/", views.dashboard_router, name="dashboard"),
+    path("dashboard/employee/", views.employee_dashboard, name="employee_dashboard"),
     path("dashboard/manager/", views.manager_dashboard, name="manager_dashboard"),
     path("dashboard/hr/", views.hr_dashboard, name="hr_dashboard"),
     path("dashboard/admin/", views.admin_dashboard, name="admin_dashboard"),

@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pending Leave Requests</title>
+    <title>Pending Leave Requests | LeaveSync</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f8fafc;
+            background: #f1f5f9;
             margin: 0;
         }
+
         header {
             background: #2563eb;
             color: white;
@@ -17,97 +18,133 @@
             justify-content: space-between;
             align-items: center;
         }
+
         header a {
             color: white;
             text-decoration: none;
             margin-left: 15px;
+            font-weight: 500;
         }
+
         .container {
-            max-width: 1200px;
-            margin: 50px auto;
+            max-width: 1100px;
+            margin: 40px auto;
             background: white;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+
+        h2 {
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+
+        /* Summary cards */
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            flex: 1;
+            min-width: 250px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .card h4 {
+            margin: 0;
+            font-size: 15px;
+            color: #475569;
+        }
+
+        .card p {
+            margin: 10px 0 0;
+            font-size: 26px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        /* Table */
         table {
             width: 100%;
             border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
             margin-top: 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
+
         th {
             background: #e0f2fe;
-            font-weight: bold;
+            padding: 12px;
+            font-size: 14px;
+            color: #1e3a8a;
+            text-align: left;
         }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        /* Buttons */
         .btn {
             padding: 6px 12px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 13px;
-            margin-right: 5px;
-            display: inline-block;
-        }
-        .approve {
-            background: #16a34a;
-            color: white;
-        }
-        .reject {
-            background: #dc2626;
-            color: white;
-        }
-        .request-proof {
-            background: #f59e0b;
-            color: white;
-        }
-        .email-draft {
-            background: #f8fafc;
-            padding: 15px;
             border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            margin-top: 10px;
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
             font-size: 13px;
-            line-height: 1.6;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .proof-badge {
+            color: white;
+            text-decoration: none;
+            margin-right: 6px;
             display: inline-block;
+        }
+
+        .approve { background: #16a34a; }
+        .reject { background: #dc2626; }
+        .proof { background: #f59e0b; }
+        .expand { background: #64748b; }
+
+        /* Proof badges */
+        .badge {
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 11px;
             font-weight: bold;
-            margin-left: 5px;
+            display: inline-block;
         }
-        .proof-requested {
-            background: #fef3c7;
-            color: #92400e;
+
+        .requested { background: #fef3c7; color: #92400e; }
+        .provided { background: #d1fae5; color: #065f46; }
+
+        /* Email row */
+        .details-row { display: none; }
+        .details-row.show { display: table-row; }
+
+        .email-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
         }
-        .proof-provided {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        .expand-btn {
-            background: #64748b;
-            color: white;
-            font-size: 11px;
-            padding: 4px 8px;
-        }
-        .details-row {
-            display: none;
-        }
-        .details-row.show {
-            display: table-row;
-        }
+
     </style>
 </head>
 <body>
+
 <header>
     <h2>Pending Leave Requests</h2>
     <nav>
@@ -117,90 +154,102 @@
 </header>
 
 <div class="container">
+
     <h2>Pending Leave Requests</h2>
-    
+
+    <!-- Summary cards -->
+    <div class="stats">
+        <div class="card">
+            <h4>Total Pending</h4>
+            <p>{{ requests|length }}</p>
+        </div>
+        <div class="card">
+            <h4>Proof Requested</h4>
+            <p>{{ requests|dictsort:"proof_requested"|length }}</p>
+        </div>
+        <div class="card">
+            <h4>Proof Provided</h4>
+            <p>{{ requests|dictsort:"proof_provided"|length }}</p>
+        </div>
+    </div>
+
+    <!-- Messages -->
     {% if messages %}
-        <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
-            {% for message in messages %}
-                <li style="padding: 10px; border-radius: 6px; margin-bottom: 10px; 
-                    background: {% if message.tags == 'error' %}#fee2e2{% elif message.tags == 'success' %}#d1fae5{% else %}#dbeafe{% endif %};
-                    color: {% if message.tags == 'error' %}#991b1b{% elif message.tags == 'success' %}#065f46{% else %}#1e40af{% endif %};">
-                    {{ message }}
-                </li>
-            {% endfor %}
+        <ul style="list-style:none; padding:0;">
+        {% for message in messages %}
+            <li style="padding:10px; border-radius:6px; margin-bottom:10px;
+                background:{% if message.tags=='error' %}#fee2e2{% elif message.tags=='success' %}#d1fae5{% else %}#dbeafe{% endif %};
+                color:{% if message.tags=='error' %}#991b1b{% elif message.tags=='success' %}#065f46{% else %}#1e40af{% endif %};">
+                {{ message }}
+            </li>
+        {% endfor %}
         </ul>
     {% endif %}
 
+    <!-- Table -->
     <table>
         <thead>
             <tr>
                 <th>Employee</th>
                 <th>Type</th>
                 <th>Dates</th>
-                <th>Status</th>
-                <th>Proof</th>
+                <th>Proof Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             {% for req in requests %}
             <tr>
                 <td>{{ req.user.username }}</td>
                 <td>{{ req.leave_type.name }}</td>
                 <td>{{ req.start_date }} → {{ req.end_date }}</td>
-                <td>{{ req.status|title }}</td>
+
                 <td>
-                    {% if req.proof_requested %}
-                        <span class="proof-badge proof-requested">
-                            {% if req.proof_provided %}✓ Provided{% else %}⚠ Requested{% endif %}
-                        </span>
+                    {% if req.proof_provided %}
+                        <span class="badge provided">✓ Provided</span>
+                    {% elif req.proof_requested %}
+                        <span class="badge requested">⚠ Requested</span>
                     {% else %}
-                        <span style="color: #94a3b8;">—</span>
+                        <span style="color:#94a3b8;">—</span>
                     {% endif %}
                 </td>
+
                 <td>
                     {% if req.user.id != user.id %}
-                        <a href="/leave/approve/{{ req.id }}/" class="btn approve">Approve</a>
-                        <a href="/leave/reject/{{ req.id }}/" class="btn reject">Reject</a>
-                        <a href="/leave/request-proof/{{ req.id }}/" class="btn request-proof">Request Proof</a>
+                        <a class="btn approve" href="/leave/approve/{{ req.id }}/">Approve</a>
+                        <a class="btn reject" href="/leave/reject/{{ req.id }}/">Reject</a>
+                        <a class="btn proof" href="/leave/request-proof/{{ req.id }}/">Request Proof</a>
                     {% else %}
-                        <span style="color: #dc2626; font-size: 12px;">⚠️ Cannot approve your own request</span>
+                        <span style="color:#dc2626; font-size:12px;">Cannot approve your own leave</span>
                     {% endif %}
+
                     {% if req.email_draft %}
-                        <button onclick="toggleEmail({{ req.id }})" class="btn expand-btn">📧 View Email</button>
+                        <button class="btn expand" onclick="toggleEmail({{ req.id }})">📧 Email</button>
                     {% endif %}
                 </td>
             </tr>
+
             {% if req.email_draft %}
             <tr class="details-row" id="email-{{ req.id }}">
-                <td colspan="6">
-                    <strong>Email Draft Sent by Employee:</strong>
-                    <div class="email-draft">{{ req.email_draft }}</div>
+                <td colspan="5">
+                    <div class="email-box">{{ req.email_draft }}</div>
                 </td>
             </tr>
             {% endif %}
-            {% if req.proof_requested and not req.proof_provided %}
-            <tr>
-                <td colspan="6" style="background: #fef3c7; color: #92400e; padding: 10px;">
-                    ⚠️ Proof requested by {{ req.proof_requested_by.username|default:"HR/Manager" }} 
-                    on {{ req.proof_requested_on|date:"F d, Y" }}. Waiting for employee to provide proof.
-                </td>
-            </tr>
-            {% endif %}
-            {% empty %}
-            <tr><td colspan="6" style="text-align: center; padding: 20px;">No pending requests.</td></tr>
+
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 
 <script>
 function toggleEmail(id) {
     const row = document.getElementById('email-' + id);
-    if (row) {
-        row.classList.toggle('show');
-    }
+    row.classList.toggle('show');
 }
 </script>
+
 </body>
 </html>

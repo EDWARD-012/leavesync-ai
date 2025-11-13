@@ -3,55 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <title>HR Dashboard | LeaveSync</title>
+
     <style>
-        body{font-family:Arial,sans-serif;background:#f8fafc;margin:0;}
-        header{background:#9333ea;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;}
-        a{color:white;text-decoration:none;margin-left:15px;}
-        .container{max-width:950px;margin:40px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-        table{width:100%;border-collapse:collapse;margin-top:20px;}
-        th,td{padding:10px;border-bottom:1px solid #ddd;}
-        th{background:#f3e8ff;}
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+        }
+
+        header {
+            background: #9333ea;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            margin-left: 18px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        /* Summary Cards */
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 250px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .card h4 {
+            margin: 0;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .card p {
+            margin: 8px 0 0;
+            font-size: 28px;
+            font-weight: bold;
+            color: #9333ea;
+        }
+
+        /* Buttons */
+        .actions {
+            margin: 25px 0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .btn-purple { background: #9333ea; }
+        .btn-green { background: #059669; }
+        .btn-blue { background: #0284c7; }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        th {
+            background: #f3e8ff;
+            padding: 12px;
+            font-size: 14px;
+            text-align: left;
+            color: #4a148c;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover td {
+            background: #faf5ff;
+        }
     </style>
 </head>
-<body>
 
+<body>
 <header>
     <h2>HR Dashboard</h2>
     <nav>
         <a href="/">Home</a>
+        <a href="/dashboard/">Dashboard</a>
         <a href="/accounts/logout/">Logout</a>
     </nav>
 </header>
 
 <div class="container">
-    <h3>Welcome {{ user.username }} (HR)</h3>
-    <p>View all employees, their balances, and leave statistics.</p>
 
-    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="/leave/upload-holidays/" style="background: #9333ea; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">📅 Upload Holidays</a>
-        <a href="/company/roles/" style="background: #059669; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">👔 Manage Roles</a>
-        <a href="/company/users/" style="background: #0284c7; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">👥 Company Users</a>
+    <h3>Welcome {{ user.username }} (HR)</h3>
+    <p>Manage employees, roles, holidays, and leave records.</p>
+
+    <!-- Summary Cards -->
+    <div class="stats">
+
+        <div class="card">
+            <h4>Total Company Employees</h4>
+            <p>{{ company_users_count }}</p>
+        </div>
+
+        <div class="card">
+            <h4>Leave Types</h4>
+            <p>{{ leave_type_count }}</p>
+        </div>
+
+        <div class="card">
+            <h4>Pending Leave Requests</h4>
+            <p>{{ pending_count }}</p>
+        </div>
+
     </div>
 
-    <h4>Employee Leave Overview</h4>
+    <!-- Buttons -->
+    <div class="actions">
+        <a href="/leave/upload-holidays/" class="btn btn-purple">📅 Upload Holidays</a>
+        <a href="/company/roles/" class="btn btn-green">👔 Manage Roles</a>
+        <a href="/company/users/" class="btn btn-blue">👥 Company Users</a>
+    </div>
+
+    <h3>Employee Leave Overview</h3>
+
     <table>
         <thead>
-            <tr><th>Employee</th><th>Type</th><th>Available</th><th>Used</th></tr>
+            <tr>
+                <th>Employee</th>
+                <th>Leave Type</th>
+                <th>Available</th>
+                <th>Used</th>
+            </tr>
         </thead>
+
         <tbody>
             {% for balance in balances %}
             <tr>
                 <td>{{ balance.user.username }}</td>
                 <td>{{ balance.leave_type.name }}</td>
                 <td>{{ balance.available_days }}</td>
-                <td>{{ balance.leave_type.default_allocation|add:-balance.available_days }}</td>
+
+                {% widthratio balance.leave_type.default_allocation 1 balance.available_days as used %}
+                <td>{{ used }}</td>
+
             </tr>
             {% empty %}
-            <tr><td colspan="4">No data found.</td></tr>
+            <tr>
+                <td colspan="4" style="text-align:center;">No records found.</td>
+            </tr>
             {% endfor %}
         </tbody>
-    </table>
-</div>
 
+    </table>
+
+    <h3 style="margin-top:40px;">Pending Leave Requests</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Leave Type</th>
+            <th>Dates</th>
+            <th>Reason</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for req in pending_requests %}
+        <tr>
+            <td>{{ req.user.username }}</td>
+            <td>{{ req.leave_type.name }}</td>
+            <td>{{ req.start_date }} → {{ req.end_date }}</td>
+            <td>{{ req.reason|default:"—" }}</td>
+
+            <td>
+                <a href="/leave/approve/{{ req.id }}/" 
+                   style="color: white; background: #059669; padding: 6px 12px; border-radius: 5px; text-decoration:none;">
+                   Approve
+                </a>
+
+                <a href="/leave/reject/{{ req.id }}/" 
+                   style="color: white; background: #dc2626; padding: 6px 12px; border-radius: 5px; margin-left:5px; text-decoration:none;">
+                   Reject
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" style="text-align:center;">No pending requests.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+</div>
 </body>
 </html>

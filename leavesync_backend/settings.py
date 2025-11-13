@@ -108,7 +108,7 @@ LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/logout/success/"
 
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_USERNAME_REQUIRED = True  # still allow username
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
@@ -123,15 +123,20 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
-# OpenAI API Configuration for AI email generation
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-# Model options:
-# - "gpt-4o-mini" (Recommended): Cheapest, $0.15/$0.60 per 1M tokens (~$0.0001 per email)
-# - "gpt-4o": More powerful, $2.50/$10 per 1M tokens (~$0.001 per email)
-# - "gpt-4o-turbo": Latest, $10/$30 per 1M tokens (~$0.004 per email)
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")  # Default: cheapest option
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-pro")
 
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
 SOCIALACCOUNT_ADAPTER = "core.adapters.CustomSocialAccountAdapter"
+
+
+ACCOUNT_EMAIL_CONFIRMATION_TEMPLATE = "account/email/email_confirmation_message.html"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[LeaveSync] "
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+DEFAULT_FROM_EMAIL = "no.reply.leavesync.1@gmail.com"
+
+ACCOUNT_EMAIL_HTML_TEMPLATE = "account/email/email_confirmation_message.html"
 

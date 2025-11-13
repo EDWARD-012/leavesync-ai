@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard | LeaveSync</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #f1f5f9;
             margin: 0;
+            padding: 0;
         }
+
         header {
             background: #111827;
             color: white;
@@ -17,77 +20,109 @@
             justify-content: space-between;
             align-items: center;
         }
+
         header h2 {
             margin: 0;
             font-size: 22px;
         }
+
         nav a {
             color: white;
             text-decoration: none;
-            margin-left: 20px;
+            margin-left: 18px;
             font-weight: 500;
         }
+
         nav a:hover {
             text-decoration: underline;
         }
+
         .container {
-            max-width: 1000px;
-            margin: 40px auto;
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        /* --- Dashboard Cards --- */
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .card {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 22px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 240px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
+
+        .card h4 {
+            margin: 0;
+            font-size: 15px;
+            color: #374151;
+        }
+
+        .card p {
+            margin: 8px 0 0;
+            font-size: 26px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        /* --- Section Headings --- */
         h3 {
+            margin-top: 35px;
             color: #1e3a8a;
-            margin-top: 0;
         }
+
+        /* --- Table Styling --- */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background: #e2e8f0;
-        }
-        .approve {
-            background: #16a34a;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-        .reject {
-            background: #dc2626;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            background: #eff6ff;
+            background: white;
+            margin-top: 12px;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
-        .stat-card {
-            text-align: center;
-        }
-        .stat-card h4 {
-            margin: 0;
-            color: #2563eb;
-        }
-        .stat-card p {
-            margin: 5px 0 0;
-            font-weight: bold;
+
+        th {
+            background: #e5e7eb;
+            padding: 12px;
+            font-size: 14px;
+            text-align: left;
             color: #111827;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: #f9fafb;
+        }
+
+        /* --- Action Buttons --- */
+        .btn {
+            padding: 7px 12px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .approve { background: #16a34a; }
+        .reject  { background: #dc2626; }
+
+        .btn:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -97,33 +132,66 @@
     <h2>Admin Dashboard</h2>
     <nav>
         <a href="/">Home</a>
+        <a href="/dashboard/">Dashboard</a>
         <a href="/accounts/logout/">Logout</a>
     </nav>
 </header>
 
 <div class="container">
-    <h3>Welcome, {{ user.username }} (Admin)</h3>
-    <p>Manage all users, monitor leave requests, and view overall statistics.</p>
 
+    <h3>Welcome {{ user.username }} (Admin)</h3>
+    <p>Monitor platform-wide activity, users, and all leave requests.</p>
+    <!-- Action Buttons -->
+<div style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap;">
+    <a href="/company/register/" 
+       style="background:#059669; color:white; padding:10px 20px; border-radius:6px; 
+              text-decoration:none; font-weight:bold;">
+        🏢 Register Company
+    </a>
+
+    <a href="/company/users/" 
+       style="background:#0284c7; color:white; padding:10px 20px; border-radius:6px; 
+              text-decoration:none; font-weight:bold;">
+        👥 Manage Users
+    </a>
+
+    <a href="/company/roles/" 
+       style="background:#9333ea; color:white; padding:10px 20px; border-radius:6px; 
+              text-decoration:none; font-weight:bold;">
+        🔧 Manage Company Roles
+    </a>
+
+    <a href="/leave/upload-holidays/" 
+       style="background:#2563eb; color:white; padding:10px 20px; border-radius:6px; 
+              text-decoration:none; font-weight:bold;">
+        📅 Upload Holidays
+    </a>
+</div>
+
+    <!-- Summary Cards -->
     <div class="stats">
-        <div class="stat-card">
+        <div class="card">
             <h4>Total Users</h4>
             <p>{{ stats.total_users }}</p>
         </div>
-        <div class="stat-card">
+
+        <div class="card">
             <h4>Pending Requests</h4>
             <p>{{ stats.pending }}</p>
         </div>
-        <div class="stat-card">
+
+        <div class="card">
             <h4>Approved Requests</h4>
             <p>{{ stats.approved }}</p>
         </div>
-        <div class="stat-card">
+
+        <div class="card">
             <h4>Rejected Requests</h4>
             <p>{{ stats.rejected }}</p>
         </div>
     </div>
 
+    <!-- Leave Requests Table -->
     <h3>All Leave Requests</h3>
     <table>
         <thead>
@@ -135,6 +203,7 @@
                 <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             {% for req in all_requests %}
             <tr>
@@ -143,34 +212,47 @@
                 <td>{{ req.start_date }} → {{ req.end_date }}</td>
                 <td>{{ req.status|title }}</td>
                 <td>
-                    <a href="/leave/approve/{{ req.id }}/" class="approve">Approve</a>
-                    <a href="/leave/reject/{{ req.id }}/" class="reject">Reject</a>
+                    <a href="/leave/approve/{{ req.id }}/" class="btn approve">Approve</a>
+                    <a href="/leave/reject/{{ req.id }}/" class="btn reject">Reject</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5">No leave requests found.</td></tr>
+            <tr>
+                <td colspan="5" style="text-align:center;">No leave requests found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 
+    <!-- Users Table -->
     <h3>All Registered Users</h3>
+
     <table>
         <thead>
-            <tr><th>Username</th><th>Email</th><th>Role</th><th>Department</th></tr>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Department</th>
+            </tr>
         </thead>
+
         <tbody>
             {% for usr in all_users %}
             <tr>
                 <td>{{ usr.username }}</td>
                 <td>{{ usr.email }}</td>
                 <td>{{ usr.role|title }}</td>
-                <td>{{ usr.department }}</td>
+                <td>{{ usr.department|default:"—" }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="4">No users found.</td></tr>
+            <tr>
+                <td colspan="4" style="text-align:center;">No users found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 
 </body>

@@ -18,6 +18,21 @@ def home(request):
 def logout_success(request):
     return render(request, "registration/logout.html")
 
+from django.shortcuts import redirect
+
+@login_required
+def dashboard_router(request):
+    role = request.user.role
+    
+    if role == "manager":
+        return redirect("manager_dashboard")
+    elif role == "hr":
+        return redirect("hr_dashboard")
+    elif role == "admin":
+        return redirect("admin_dashboard")
+    else:
+        return redirect("employee_dashboard")
+
 
 # 👩‍💼 Employee Dashboard
 from core.utils.ai_suggestions import suggest_best_leaves
@@ -56,12 +71,25 @@ def hr_dashboard(request):
     if request.user.role != "hr":
         return redirect("employee_dashboard")
 
-    # HR can see all balances from their own company
+    company = request.user.company
+
+    # HR sees only their company pending requests
+    pending_requests = LeaveRequest.objects.filter(
+        user__company=company, status="pending"
+    ).select_related("user", "leave_type").order_by("-applied_on")
+
     balances = LeaveBalance.objects.select_related("user", "leave_type").filter(
-        user__company=request.user.company
+        user__company=company
     ).order_by("user__username")
 
-    return render(request, "dashboards/hr.html", {"balances": balances})
+    return render(request, "dashboards/hr.html", {
+        "balances": balances,
+        "pending_requests": pending_requests,
+        "company_users_count": User.objects.filter(company=company).count(),
+        "leave_type_count": LeaveType.objects.count(),
+        "pending_count": pending_requests.count(),
+    })
+
 
 
 
