@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register Company | LeaveSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+        }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+        .info-box h4 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h2>Register Company</h2>
+    <nav>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/accounts/logout/">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>Register Your Company</h2>
+    
+    <div class="info-box">
+        <h4>📋 How It Works:</h4>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>Register your company with your email domain (e.g., "acme.com")</li>
+            <li>After registration, you'll be able to designate HR/Manager email addresses</li>
+            <li>When users sign up with Google using those email addresses, they'll automatically get the designated role</li>
+            <li>You can also manually assign roles to existing users</li>
+        </ul>
+    </div>
+
+    {% if messages %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+            {% for message in messages %}
+                <li style="padding: 10px; border-radius: 6px; margin-bottom: 10px; 
+                    background: {% if message.tags == 'error' %}#fee2e2{% elif message.tags == 'success' %}#d1fae5{% else %}#dbeafe{% endif %};
+                    color: {% if message.tags == 'error' %}#991b1b{% elif message.tags == 'success' %}#065f46{% else %}#1e40af{% endif %};">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">Company Name *</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.domain.id_for_label }}">Email Domain *</label>
+            {{ form.domain }}
+            {% if form.domain.help_text %}
+                <p class="help-text">{{ form.domain.help_text }}</p>
+            {% endif %}
+            {% if form.domain.errors %}
+                <div style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ form.domain.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.location.id_for_label }}">Location *</label>
+            {{ form.location }}
+            {% if form.location.errors %}
+                <div style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ form.location.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit">Register Company</button>
+    </form>
+</div>
+</body>
+</html>
+

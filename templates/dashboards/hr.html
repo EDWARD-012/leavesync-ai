@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HR Dashboard | LeaveSync</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f8fafc;margin:0;}
+        header{background:#9333ea;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;}
+        a{color:white;text-decoration:none;margin-left:15px;}
+        .container{max-width:950px;margin:40px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        table{width:100%;border-collapse:collapse;margin-top:20px;}
+        th,td{padding:10px;border-bottom:1px solid #ddd;}
+        th{background:#f3e8ff;}
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>HR Dashboard</h2>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/accounts/logout/">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h3>Welcome {{ user.username }} (HR)</h3>
+    <p>View all employees, their balances, and leave statistics.</p>
+
+    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="/leave/upload-holidays/" style="background: #9333ea; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">📅 Upload Holidays</a>
+        <a href="/company/roles/" style="background: #059669; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">👔 Manage Roles</a>
+        <a href="/company/users/" style="background: #0284c7; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">👥 Company Users</a>
+    </div>
+
+    <h4>Employee Leave Overview</h4>
+    <table>
+        <thead>
+            <tr><th>Employee</th><th>Type</th><th>Available</th><th>Used</th></tr>
+        </thead>
+        <tbody>
+            {% for balance in balances %}
+            <tr>
+                <td>{{ balance.user.username }}</td>
+                <td>{{ balance.leave_type.name }}</td>
+                <td>{{ balance.available_days }}</td>
+                <td>{{ balance.leave_type.default_allocation|add:-balance.available_days }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No data found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

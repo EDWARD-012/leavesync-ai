@@ -1,0 +1,57 @@
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In Via Google | LeaveSync</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #2563eb, #1e3a8a);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      width: 400px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    h2 { margin-bottom: 10px; }
+    p { color: #e0e7ff; margin-bottom: 25px; }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Sign In via Google</h2>
+    <p>You’re about to sign in using your Google account for LeaveSync.</p>
+
+    <form method="post" action="{% url 'socialaccount_connections' %}">
+      {% csrf_token %}
+      <button type="submit">Continue</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pending Leave Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+        }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #e0f2fe;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        .approve {
+            background: #16a34a;
+            color: white;
+        }
+        .reject {
+            background: #dc2626;
+            color: white;
+        }
+        .request-proof {
+            background: #f59e0b;
+            color: white;
+        }
+        .email-draft {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .proof-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .proof-requested {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .proof-provided {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .expand-btn {
+            background: #64748b;
+            color: white;
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+        .details-row {
+            display: none;
+        }
+        .details-row.show {
+            display: table-row;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h2>Pending Leave Requests</h2>
+    <nav>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/accounts/logout/">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>Pending Leave Requests</h2>
+    
+    {% if messages %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+            {% for message in messages %}
+                <li style="padding: 10px; border-radius: 6px; margin-bottom: 10px; 
+                    background: {% if message.tags == 'error' %}#fee2e2{% elif message.tags == 'success' %}#d1fae5{% else %}#dbeafe{% endif %};
+                    color: {% if message.tags == 'error' %}#991b1b{% elif message.tags == 'success' %}#065f46{% else %}#1e40af{% endif %};">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Proof</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ req.user.username }}</td>
+                <td>{{ req.leave_type.name }}</td>
+                <td>{{ req.start_date }} → {{ req.end_date }}</td>
+                <td>{{ req.status|title }}</td>
+                <td>
+                    {% if req.proof_requested %}
+                        <span class="proof-badge proof-requested">
+                            {% if req.proof_provided %}✓ Provided{% else %}⚠ Requested{% endif %}
+                        </span>
+                    {% else %}
+                        <span style="color: #94a3b8;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.user.id != user.id %}
+                        <a href="/leave/approve/{{ req.id }}/" class="btn approve">Approve</a>
+                        <a href="/leave/reject/{{ req.id }}/" class="btn reject">Reject</a>
+                        <a href="/leave/request-proof/{{ req.id }}/" class="btn request-proof">Request Proof</a>
+                    {% else %}
+                        <span style="color: #dc2626; font-size: 12px;">⚠️ Cannot approve your own request</span>
+                    {% endif %}
+                    {% if req.email_draft %}
+                        <button onclick="toggleEmail({{ req.id }})" class="btn expand-btn">📧 View Email</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% if req.email_draft %}
+            <tr class="details-row" id="email-{{ req.id }}">
+                <td colspan="6">
+                    <strong>Email Draft Sent by Employee:</strong>
+                    <div class="email-draft">{{ req.email_draft }}</div>
+                </td>
+            </tr>
+            {% endif %}
+            {% if req.proof_requested and not req.proof_provided %}
+            <tr>
+                <td colspan="6" style="background: #fef3c7; color: #92400e; padding: 10px;">
+                    ⚠️ Proof requested by {{ req.proof_requested_by.username|default:"HR/Manager" }} 
+                    on {{ req.proof_requested_on|date:"F d, Y" }}. Waiting for employee to provide proof.
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr><td colspan="6" style="text-align: center; padding: 20px;">No pending requests.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function toggleEmail(id) {
+    const row = document.getElementById('email-' + id);
+    if (row) {
+        row.classList.toggle('show');
+    }
+}
+</script>
+</body>
+</html>

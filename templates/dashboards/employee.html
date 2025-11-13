@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Dashboard | LeaveSync</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      color: #1e293b;
+    }
+
+    header {
+      background: linear-gradient(90deg, #2563eb, #1e40af);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    header h1 { font-size: 22px; font-weight: 600; margin: 0; }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 25px;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    nav a:hover { text-decoration: underline; color: #dbeafe; }
+
+    .main {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 30px;
+      gap: 20px;
+    }
+
+    .left-panel, .right-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      min-width: 300px;
+    }
+    .left-panel { flex: 2; }
+    .right-panel { flex: 1; max-width: 420px; }
+
+    h2, h3 { color: #1e3a8a; margin-top: 0; }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 5px;
+      display: inline-block;
+      transition: 0.3s;
+    }
+    .btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th { background-color: #eff6ff; }
+
+    footer {
+      background: #1e293b;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 30px;
+      font-size: 14px;
+    }
+
+    /* Calendar section */
+    .calendar-container {
+      text-align: center;
+    }
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .day {
+      padding: 14px 0;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .holiday { background: #fde68a; color: #92400e; }
+    .leave { background: #fecaca; color: #7f1d1d; }
+    .workday { background: #bbf7d0; color: #065f46; }
+
+    /* Emoji icons for display */
+    .emoji-holiday::after { content: "🟡"; }
+    .emoji-leave::after { content: "🔴"; }
+    .emoji-workday::after { content: "🟢"; }
+
+    /* Calendar header */
+    .calendar-header {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 10px;
+    }
+
+    .legend {
+      margin-top: 15px;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 15px;
+    }
+
+    .legend p {
+      margin: 5px 0;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .main { flex-direction: column; }
+      .right-panel { order: -1; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>LeaveSync</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/leave/apply/">Apply Leave</a>
+    <a href="/leave/history/">History</a>
+    <a href="/accounts/logout/">Logout</a>
+  </nav>
+</header>
+
+<div class="main">
+
+  <!-- Left Section -->
+  <div class="left-panel">
+    <h2>Welcome, {{ user.username }} 👋</h2>
+    <p>Here’s your latest leave overview and smart suggestions!</p>
+
+    <h3>Your Leave Balances</h3>
+    <table>
+      <thead><tr><th>Leave Type</th><th>Available Days</th></tr></thead>
+      <tbody>
+        {% for balance in balances %}
+          <tr><td>{{ balance.leave_type.name }}</td><td>{{ balance.available_days }}</td></tr>
+        {% empty %}
+          <tr><td colspan="2">No leave balances found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>💡 Smart Leave Suggestions</h3>
+    <ul style="list-style:none; padding:0;">
+      {% for d, msg in suggestions %}
+        <li style="background:#e0f2fe; margin:6px 0; padding:8px 10px; border-left:4px solid #2563eb; border-radius:5px;">
+          <strong>{{ d }}</strong> — {{ msg }}
+        </li>
+      {% empty %}
+        <li>No suggestions right now. Keep working hard 💪</li>
+      {% endfor %}
+    </ul>
+
+    <h3>Recent Leave Requests</h3>
+    <table>
+      <thead><tr><th>Type</th><th>Dates</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for req in leave_requests %}
+          <tr>
+            <td>{{ req.leave_type.name }}</td>
+            <td>{{ req.start_date }} → {{ req.end_date }}</td>
+            <td>{{ req.status|title }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No leave requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Right Section (Calendar) -->
+  <div class="right-panel">
+    <h3 style="color:#1e3a8a; display:flex; align-items:center; gap:10px;">
+        📅 Leave Calendar
+    </h3>
+
+    <div id="calendar-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+    <button onclick="prevMonth()">← Prev</button>
+    <h3 id="month-title" style="color:#1e3a8a;">Month Year</h3>
+    <button onclick="nextMonth()">Next →</button>
+    </div>
+    <div id="calendar"></div>
+
+    <div id="legend">
+        <div><span class="dot workday"></span> Workday</div>
+        <div><span class="dot weekend"></span> Weekend / Holiday</div>
+        <div><span class="dot leave"></span> Leave</div>
+        <div><span class="dot smart_leave"></span> Smart Suggestion</div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© {{ now|date:"Y" }} LeaveSync. All rights reserved.</p>
+</footer>
+<style>
+  .smart_leave { background-color: #f87171; } /* Light red for AI suggested leave */
+  .tooltip {
+    position: absolute;
+    background: #111827;
+    color: #f9fafb;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    visibility: hidden;
+    z-index: 999;
+    white-space: nowrap;
+    transform: translate(-50%, -120%);
+  }
+  .day-container { position: relative; display: inline-block; }
+  .day:hover .tooltip { visibility: visible; }
+</style>
+<style>
+  #calendar-container {
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: 0; /* 👈 puts it top-right */
+  }
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+  }
+  .day {
+    padding: 10px 0;
+    border-radius: 8px;
+    font-weight: 500;
+    color: #222;
+    transition: transform 0.2s ease;
+  }
+  .day:hover {
+    transform: scale(1.05);
+  }
+  .header {
+    font-weight: bold;
+    color: #1e3a8a;
+    background: transparent;
+  }
+  .workday { background-color: #bbf7d0; } /* green */
+  .weekend { background-color: #fde68a; } /* yellow */
+  .leave { background-color: #fca5a5; } /* red */
+  #legend {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 15px;
+    background: #f9fafb;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  #legend div { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.workday { background: #4ade80; }
+  .dot.weekend { background: #facc15; }
+  .dot.leave { background: #ef4444; }
+  .dot.smart_leave { background: #fb7185; }
+  @media (max-width: 768px) {
+    #calendar-container { max-width: 100%; margin: 20px auto; }
+  }
+</style>
+
+<script>
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+async function loadCalendar() {
+  const res = await fetch(`/api/calendar/?month=${currentMonth + 1}&year=${currentYear}`);
+  const data = await res.json();
+
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  document.getElementById("month-title").textContent =
+    `${monthNames[currentMonth]} ${currentYear}`;
+
+  // Header row
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  for (const d of days) {
+    const div = document.createElement("div");
+    div.className = "day header";
+    div.textContent = d;
+    calendar.appendChild(div);
+  }
+
+  // Align start day
+  const start = new Date(currentYear, currentMonth, 1);
+  const end = new Date(currentYear, currentMonth + 1, 0);
+  for (let i = 0; i < start.getDay(); i++) {
+    const empty = document.createElement("div");
+    empty.className = "day";
+    calendar.appendChild(empty);
+  }
+
+  // Add days
+  for (let d = 1; d <= end.getDate(); d++) {
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const event = data.find(e => e.date === dateStr);
+    const divWrap = document.createElement("div");
+    divWrap.className = "day-container";
+
+    const div = document.createElement("div");
+    div.className = "day " + (event ? event.type : "workday");
+    div.textContent = d;
+
+    const tooltip = document.createElement("span");
+    tooltip.className = "tooltip";
+    tooltip.textContent = event ? event.tooltip : "Regular Working Day";
+
+    divWrap.appendChild(div);
+    divWrap.appendChild(tooltip);
+    calendar.appendChild(divWrap);
+  }
+}
+
+// Navigation buttons
+function prevMonth() {
+  currentMonth--;
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
+  loadCalendar();
+}
+
+function nextMonth() {
+  currentMonth++;
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+  loadCalendar();
+}
+
+window.onload = loadCalendar;
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply for Leave</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+        }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button.secondary {
+            background: #64748b;
+        }
+        button.secondary:hover {
+            background: #475569;
+        }
+        .email-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .email-draft {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 150px;
+            margin-top: 10px;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h2>Apply for Leave</h2>
+    <nav>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/accounts/logout/">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>Apply for Leave</h2>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" id="leaveForm">
+        {% csrf_token %}
+        <input type="hidden" name="email_draft" id="emailDraftInput" value="">
+        
+        <div>
+            <label for="{{ form.leave_type.id_for_label }}">Leave Type</label>
+            {{ form.leave_type }}
+        </div>
+        
+        <div>
+            <label for="{{ form.start_date.id_for_label }}">Start Date</label>
+            {{ form.start_date }}
+        </div>
+        
+        <div>
+            <label for="{{ form.end_date.id_for_label }}">End Date</label>
+            {{ form.end_date }}
+        </div>
+        
+        <div>
+            <label for="{{ form.reason.id_for_label }}">Reason</label>
+            {{ form.reason }}
+            <small style="color: #666; font-size: 12px;">Enter your reason for leave. You can generate an AI email draft after filling this.</small>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" name="generate_email" id="generateBtn">🤖 Generate Email Draft</button>
+            <button type="submit" name="submit_leave" onclick="saveEmailDraft()">Submit Leave Request</button>
+        </div>
+    </form>
+
+    {% if email_draft %}
+    <div class="email-section">
+        <h3>📧 AI-Generated Email Draft</h3>
+        <p style="font-size: 14px; color: #666;">Review and edit the email below. You can copy it and send it manually, or regenerate if needed.</p>
+        
+        <textarea id="emailDraft" class="email-draft" readonly>{{ email_draft }}</textarea>
+        
+        <div class="button-group">
+            <button type="button" onclick="copyEmail()" class="secondary">📋 Copy Email</button>
+            <button type="button" onclick="editEmail()" class="secondary">✏️ Edit Email</button>
+            <button type="submit" form="leaveForm" name="generate_email" class="secondary">🔄 Regenerate</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        function copyEmail() {
+            const emailText = document.getElementById('emailDraft');
+            emailText.select();
+            document.execCommand('copy');
+            alert('Email copied to clipboard!');
+        }
+
+        function editEmail() {
+            const emailText = document.getElementById('emailDraft');
+            emailText.removeAttribute('readonly');
+            emailText.style.border = '2px solid #2563eb';
+            emailText.focus();
+        }
+
+        function saveEmailDraft() {
+            const emailDraft = document.getElementById('emailDraft');
+            const emailDraftInput = document.getElementById('emailDraftInput');
+            if (emailDraft && emailDraftInput) {
+                emailDraftInput.value = emailDraft.value;
+            }
+        }
+
+        // Auto-generate email when form fields are filled
+        document.getElementById('leaveForm').addEventListener('submit', function(e) {
+            if (e.submitter && e.submitter.name === 'submit_leave') {
+                // Save email draft before submitting
+                saveEmailDraft();
+            } else if (e.submitter && e.submitter.name === 'generate_email') {
+                const leaveType = document.querySelector('[name="leave_type"]').value;
+                const startDate = document.querySelector('[name="start_date"]').value;
+                const endDate = document.querySelector('[name="end_date"]').value;
+                const reason = document.querySelector('[name="reason"]').value;
+                
+                if (!leaveType || !startDate || !endDate || !reason) {
+                    e.preventDefault();
+                    alert('Please fill in all fields before generating email draft.');
+                    return false;
+                }
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

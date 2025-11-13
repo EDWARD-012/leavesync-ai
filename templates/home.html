@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeaveSync | Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin: 10px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+        footer {
+            background: #1e293b;
+            color: white;
+            text-align: center;
+            padding: 12px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>LeaveSync</h1>
+    <nav>
+        {% if user.is_authenticated %}
+            <a href="/dashboard/">Dashboard</a>
+            <a href="/accounts/logout/">Logout</a>
+        {% else %}
+            <a href="/accounts/login/">Login</a>
+            <a href="/accounts/signup/">Sign up</a>
+        {% endif %}
+    </nav>
+</header>
+
+<div class="container">
+    {% if user.is_authenticated %}
+        <h2>Welcome back, {{ user.username }}!</h2>
+        <p>Manage your leaves, view balances, and track requests effortlessly with LeaveSync.</p>
+        <a href="/leave/apply/" class="btn">Apply for Leave</a>
+        <a href="/leave/pending/" class="btn">Pending Requests</a>
+        <a href="/dashboard/" class="btn">Go to Dashboard</a>
+    {% else %}
+        <h2>Welcome to LeaveSync</h2>
+        <p>A smart leave management system for employees, managers, and HR.</p>
+        <a href="/accounts/signup/" class="btn">Get Started</a>
+        <a href="/accounts/login/" class="btn">Sign In</a>
+    {% endif %}
+</div>
+
+<footer>
+    <p>© {{ now|date:"Y" }} LeaveSync. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

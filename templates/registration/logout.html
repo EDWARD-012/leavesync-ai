@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out | LeaveSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+        p {
+            color: #374151;
+            margin-bottom: 25px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-green {
+            background-color: #16a34a;
+        }
+        .btn-green:hover {
+            background-color: #15803d;
+        }
+        footer {
+            margin-top: 30px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>You have been logged out 👋</h2>
+        <p>Thank you for using <strong>LeaveSync</strong>. We hope to see you again soon.</p>
+        <a href="/accounts/login/" class="btn">Login Again</a>
+        <a href="/" class="btn btn-green">Go to Home</a>
+    </div>
+
+    <footer>
+        © <script>document.write(new Date().getFullYear())</script> LeaveSync. All rights reserved.
+    </footer>
+</body>
+</html>

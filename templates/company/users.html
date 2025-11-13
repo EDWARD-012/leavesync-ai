@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Company Users | LeaveSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+        }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #eff6ff;
+            font-weight: bold;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-hr { background: #9333ea; color: white; }
+        .badge-manager { background: #059669; color: white; }
+        .badge-employee { background: #64748b; color: white; }
+        .badge-admin { background: #dc2626; color: white; }
+        select {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .role-form {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h2>Company Users - {{ company.name }}</h2>
+    <nav>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/accounts/logout/">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>Manage Company Users</h2>
+    
+    {% if messages %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+            {% for message in messages %}
+                <li style="padding: 10px; border-radius: 6px; margin-bottom: 10px; 
+                    background: {% if message.tags == 'error' %}#fee2e2{% elif message.tags == 'success' %}#d1fae5{% else %}#dbeafe{% endif %};
+                    color: {% if message.tags == 'error' %}#991b1b{% elif message.tags == 'success' %}#065f46{% else %}#1e40af{% endif %};">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Current Role</th>
+                <th>Department</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <span class="badge badge-{{ user.role }}">
+                        {{ user.get_role_display }}
+                    </span>
+                </td>
+                <td>{{ user.department|default:"—" }}</td>
+                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                <td>
+                    <form method="post" class="role-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="update_role" value="1">
+                        <select name="role" onchange="this.form.submit()">
+                            <option value="employee" {% if user.role == 'employee' %}selected{% endif %}>Employee</option>
+                            <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+                            <option value="hr" {% if user.role == 'hr' %}selected{% endif %}>HR</option>
+                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px; color: #64748b;">
+                    No users in company yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 30px;">
+        <a href="/company/roles/" style="color: #2563eb; text-decoration: none;">← Back to Role Designations</a>
+    </div>
+</div>
+</body>
+</html>
+

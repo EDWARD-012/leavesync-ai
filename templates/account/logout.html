@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Out | LeaveSync</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2563eb, #1e3a8a);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff;
+    }
+    .logout-container {
+      background: rgba(255,255,255,0.1);
+      padding: 40px 50px;
+      border-radius: 15px;
+      backdrop-filter: blur(20px);
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h2 {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #e0e7ff;
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+    form button {
+      background-color: #3b82f6;
+      border: none;
+      padding: 12px 30px;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    form button:hover {
+      background-color: #1e40af;
+      transform: translateY(-2px);
+    }
+    a {
+      display: block;
+      margin-top: 20px;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="logout-container">
+    <h2>Are you sure you want to sign out?</h2>
+    <p>We’ll miss you, {{ user.username }} 👋</p>
+    <form method="post" action="{% url 'account_logout' %}">
+      {% csrf_token %}
+      <button type="submit">Sign Out</button>
+    </form>
+    <a href="/">Back to Home</a>
+  </div>
+</body>
+</html>

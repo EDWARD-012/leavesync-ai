@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leave History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9fafb;
+            margin: 0;
+        }
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #f3f4f6;
+            font-weight: bold;
+        }
+        .proof-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .proof-requested {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .proof-provided {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h2>My Leave History</h2>
+    <nav>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/accounts/logout/">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>My Leave History</h2>
+    
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Proof Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in leaves %}
+            <tr>
+                <td>{{ req.leave_type.name }}</td>
+                <td>{{ req.start_date }} → {{ req.end_date }}</td>
+                <td>{{ req.status|title }}</td>
+                <td>
+                    {% if req.proof_requested %}
+                        {% if req.proof_provided %}
+                            <span class="proof-badge proof-provided">✓ Provided</span>
+                        {% else %}
+                            <span class="proof-badge proof-requested">⚠ Requested</span>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: #94a3b8;">Not Required</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.proof_requested and not req.proof_provided %}
+                        <a href="/leave/mark-proof/{{ req.id }}/" class="btn">Mark Proof as Provided</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% if req.proof_requested and not req.proof_provided %}
+            <tr>
+                <td colspan="5">
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Proof Required:</strong> 
+                        Proof was requested by {{ req.proof_requested_by.username|default:"HR/Manager" }} 
+                        on {{ req.proof_requested_on|date:"F d, Y" }}. 
+                        Please provide the necessary documentation and mark it as provided.
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr><td colspan="5" style="text-align: center; padding: 20px;">No leave requests found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/dashboard/" style="display: inline-block; margin-top: 20px; color: #2563eb;">← Back to Dashboard</a>
+</div>
+</body>
+</html>
