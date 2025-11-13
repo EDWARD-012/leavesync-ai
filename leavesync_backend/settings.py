@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "core",
 ]
 
+ROOT_URLCONF = "leavesync_backend.urls"
+WSGI_APPLICATION = "leavesync_backend.wsgi.application"
+
 # ------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------
