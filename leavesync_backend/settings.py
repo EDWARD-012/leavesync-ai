@@ -168,3 +168,9 @@ WSGI_APPLICATION = "leavesync_backend.wsgi.application"
 # ------------------------------------------------------------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
+
+
+if not DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    ACCOUNT_EMAIL_VERIFICATION = "none"
+    ACCOUNT_EMAIL_REQUIRED = False
