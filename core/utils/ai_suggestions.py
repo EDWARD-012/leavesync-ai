@@ -158,23 +158,60 @@ def _normalize_ai_payload(payload: Dict):
 def _fallback_suggestions(user, lookahead_days: int = 90):
     today = date.today()
     working_days = set(_get_working_days(user))
-    day_map = {}
 
+    # ----------------------------
+    # 1️⃣ PREFETCH EVERYTHING IN ONE QUERY
+    # ----------------------------
+    end_date = today + timedelta(days=lookahead_days)
+
+    holidays = set(
+        Holiday.objects.filter(
+            company=user.company,
+            date__range=(today, end_date)
+        ).values_list("date", flat=True)
+    )
+
+    # Prefetch all leave ranges for the user
+    leave_ranges = list(
+        LeaveRequest.objects.filter(
+            user=user,
+            start_date__lte=end_date,
+            end_date__gte=today
+        ).values_list("start_date", "end_date")
+    )
+
+    # Convert leave ranges into a set of all dates the user is on leave
+    leave_days = set()
+    for start, end in leave_ranges:
+        d = start
+        while d <= end:
+            leave_days.add(d)
+            d += timedelta(days=1)
+
+    # ----------------------------
+    # 2️⃣ BUILD DAY MAP WITHOUT EXTRA QUERIES
+    # ----------------------------
+    day_map = {}
     for offset in range(lookahead_days):
         d = today + timedelta(days=offset + 1)
-        day_type = "workday"
 
-        if (d.weekday() + 1) not in working_days:
-            day_type = "weekend"
-        elif Holiday.objects.filter(company=user.company, date=d).exists():
-            day_type = "holiday"
-        elif LeaveRequest.objects.filter(user=user, start_date__lte=d, end_date__gte=d).exists():
+        if d in leave_days:
             day_type = "leave"
+        elif d in holidays:
+            day_type = "holiday"
+        elif (d.weekday() + 1) not in working_days:
+            day_type = "weekend"
+        else:
+            day_type = "workday"
 
         day_map[d] = {"type": day_type}
 
+    # Detect bridge days
     _apply_bridge_detection(day_map)
 
+    # ----------------------------
+    # 3️⃣ COLLECT SUGGESTIONS
+    # ----------------------------
     suggestions = [
         (d.strftime("%d %b %Y"), SMART_TOOLTIP)
         for d, v in day_map.items()
