@@ -1,1 +1,1 @@
-web: gunicorn leavesync_backend.wsgi
+web: gunicorn leavesync_backend.wsgi --workers=1 --threads=2 --timeout=120
