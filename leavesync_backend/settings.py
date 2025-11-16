@@ -45,15 +45,12 @@ INSTALLED_APPS = [
     "core",
 ]
 
-ROOT_URLCONF = "leavesync_backend.urls"
-WSGI_APPLICATION = "leavesync_backend.wsgi.application"
-
 # ------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",   # only once
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -63,6 +60,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+ROOT_URLCONF = "leavesync_backend.urls"
+WSGI_APPLICATION = "leavesync_backend.wsgi.application"
+
 # ------------------------------------------------------------
 # DATABASE
 # ------------------------------------------------------------
@@ -71,7 +71,7 @@ DATABASES = {
 }
 
 # ------------------------------------------------------------
-# AUTH
+# AUTH MODEL & BACKENDS
 # ------------------------------------------------------------
 AUTH_USER_MODEL = "core.User"
 
@@ -83,6 +83,9 @@ AUTHENTICATION_BACKENDS = (
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/logout/success/"
 
+# ------------------------------------------------------------
+# ALLAUTH CONFIG
+# ------------------------------------------------------------
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_USERNAME_REQUIRED = True
@@ -97,13 +100,13 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_ADAPTER = "core.adapters.CustomSocialAccountAdapter"
 
 # ------------------------------------------------------------
-# GOOGLE PROVIDER
+# SOCIAL (GOOGLE)
 # ------------------------------------------------------------
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "secret": os.getenv("GOOGLE_SECRET"),   # mapped to your env
+            "secret": os.getenv("GOOGLE_SECRET"),
             "key": "",
         },
         "SCOPE": ["email", "profile"],
@@ -112,35 +115,23 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # ------------------------------------------------------------
-# EMAIL CONFIG
+# EMAIL (BREVO)
 # ------------------------------------------------------------
-EMAIL_BACKEND = os.getenv(
-    "EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend"
-)
-
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL",
-    EMAIL_HOST_USER
+ACCOUNT_EMAIL_CONFIRMATION_TEMPLATE = (
+    "account/email/email_confirmation_message.txt"
 )
-
-ACCOUNT_EMAIL_CONFIRMATION_TEMPLATE = "account/email/email_confirmation_message.html"
-ACCOUNT_EMAIL_HTML_TEMPLATE = "account/email/email_confirmation_message.html"
+ACCOUNT_EMAIL_HTML_TEMPLATE = (
+    "account/email/email_confirmation_message.html"
+)
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
-
-# ------------------------------------------------------------
-# STATIC FILES
-# ------------------------------------------------------------
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ------------------------------------------------------------
 # TEMPLATES
@@ -161,7 +152,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "leavesync_backend.wsgi.application"
+# ------------------------------------------------------------
+# STATIC FILES
+# ------------------------------------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ------------------------------------------------------------
 # AI CONFIG
@@ -169,8 +166,11 @@ WSGI_APPLICATION = "leavesync_backend.wsgi.application"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
 
-
+# ------------------------------------------------------------
+# PRODUCTION OVERRIDES
+# ------------------------------------------------------------
 if not DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    ACCOUNT_EMAIL_VERIFICATION = "none"
-    ACCOUNT_EMAIL_REQUIRED = False
+    # keep SMTP working in production
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
