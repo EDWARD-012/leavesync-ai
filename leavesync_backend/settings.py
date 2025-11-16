@@ -117,22 +117,31 @@ SOCIALACCOUNT_PROVIDERS = {
 # ------------------------------------------------------------
 # EMAIL (BREVO)
 # ------------------------------------------------------------
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
-EMAIL_TIMEOUT = 20
+# ------------------------------------------------------------
+# EMAIL CONFIG — USING BREVO API (Recommended for Render Free)
+# ------------------------------------------------------------
 
+# Brevo API Key (Render ENV variable)
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+
+# Email sender (must be verified inside Brevo)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+# Use our custom Brevo email adapter for Allauth
+ACCOUNT_ADAPTER = "core.adapters_email.CustomAccountAdapter"
+
+# Allauth Email Templates
 ACCOUNT_EMAIL_CONFIRMATION_TEMPLATE = (
     "account/email/email_confirmation_message.txt"
 )
 ACCOUNT_EMAIL_HTML_TEMPLATE = (
     "account/email/email_confirmation_message.html"
 )
+
+# Email verification expiration
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 # ------------------------------------------------------------
 # TEMPLATES
